@@ -225,10 +225,10 @@ workspace {
                         tags "Microsoft Azure - API Management Services" "App Interface"
                     }
 
-                    privateGatewayInstance -> devidp "Auth challenge" {
+                    privateGatewayInstance -> devidp "Dev challenge" {
                         tags "IDP Challenge"
                     }
-                    devidp -> privateGatewayInstance "Auth response" {
+                    devidp -> privateGatewayInstance "Dev response" {
                         tags "IDP Response"
                     }
                     devfirewall -> devpolicies "Get VNET Security Policies" {
@@ -270,6 +270,12 @@ workspace {
                 tags "Agent Path"
             }
             devfirewall -> privateGatewayInstance "HTTPS"
+            devfirewall -> devidp "DevOps challenge" {
+                tags "IDP Challenge"
+            }
+            devidp -> devfirewall "DevOps response" {
+                tags "IDP Response"
+            }
 
         }
 
@@ -306,7 +312,6 @@ workspace {
 
         deployment * devEnv {
             include *
-            autoLayout tb
         }
 
         styles {
@@ -383,12 +388,12 @@ workspace {
                 color #0DB7ED
             }
             relationship "Registry Publish Path" {
-                routing Curved
+                routing Orthogonal
                 style Dashed
                 color #ff8c00
             }
             relationship "Agent Path" {
-                routing Curved
+                routing Orthogonal
                 style Dashed
                 color #ff8c00
             }
