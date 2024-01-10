@@ -136,6 +136,20 @@ workspace {
             tags "Microsoft Azure - App Services" "App Group"
         }
 
+        apiGatewaypublic -> analyticsapi
+        apiGatewaypublic -> paymentGatewayapi
+        apiGatewaypublic -> orderMgmtapi
+        apiGatewaypublic -> shoppingCartapi
+        apiGatewaypublic -> productCatalogapi
+        apiGatewaypublic -> userMgmtapi
+
+        apiGatewayprivate -> analyticsapi
+        apiGatewayprivate -> paymentGatewayapi
+        apiGatewayprivate -> orderMgmtapi
+        apiGatewayprivate -> shoppingCartapi
+        apiGatewayprivate -> productCatalogapi
+        apiGatewayprivate -> userMgmtapi
+        
         devEnv = deploymentEnvironment "Development Environment" {
             
             deploymentNode "Corporate Network" {
@@ -278,25 +292,6 @@ workspace {
             }
 
         }
-
-        roleCustomer -> apiGatewaypublic
-        
-        apiGatewaypublic -> analyticsapi
-        apiGatewaypublic -> paymentGatewayapi
-        apiGatewaypublic -> orderMgmtapi
-        apiGatewaypublic -> shoppingCartapi
-        apiGatewaypublic -> productCatalogapi
-        apiGatewaypublic -> userMgmtapi
-
-        roleDeveloper -> apiGatewayprivate
-        
-        apiGatewayprivate -> analyticsapi
-        apiGatewayprivate -> paymentGatewayapi
-        apiGatewayprivate -> orderMgmtapi
-        apiGatewayprivate -> shoppingCartapi
-        apiGatewayprivate -> productCatalogapi
-        apiGatewayprivate -> userMgmtapi
-
 
     }
     
