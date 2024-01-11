@@ -153,23 +153,23 @@ workspace {
         devEnv = deploymentEnvironment "Development Environment" {
             
             deploymentNode "Corporate Network" {
-                developer = infrastructureNode "Developer" {
+                devrole = infrastructureNode "Developer" {
                     tags "Microsoft Azure - Custom Azure AD Roles" "Person"
                 }
             }
 
             deploymentNode "Datadog SaaS" {
-                devdatadog = infrastructureNode "Dev Datadog APM" {
+                devdatadog = infrastructureNode "Datadog APM" {
                     tags "Datadog APM"
                 }
                 tags "Datadog APM"
             }
             
             deploymentNode "Azure DevOps" {
-                devrepo = infrastructureNode "Dev Azure DevOps Repository" {
+                devrepo = infrastructureNode "Azure DevOps Repository" {
                     tags "Azure DevOps Git"
                 }
-                devpipeline = infrastructureNode "Dev Azure DevOps Release Agent" {
+                devpipeline = infrastructureNode "Azure DevOps Release Agent" {
                     -> devrepo "Pulls source"
                     -> devdatadog "Build/Unit Test analytics"
                     tags "Azure DevOps Agent"
@@ -179,21 +179,21 @@ workspace {
             
             deploymentNode "Microsoft Azure" {
                 
-                devidp = infrastructureNode "Dev Azure Active Directory" {
+                devidp = infrastructureNode "Azure Active Directory" {
                     tags "Microsoft Azure - Azure Active Directory" "Identity Provider"
                 }
                 
                 deploymentNode "Azure VNET" {
                     
-                    devfirewall = infrastructureNode "Dev Network Firewall" {
+                    devfirewall = infrastructureNode "Network Firewall" {
                         tags "Microsoft Azure - Firewalls" "Firewall"
                     }
                     
-                    devpolicies = infrastructureNode "Dev VNET Security Policies" {
+                    devpolicies = infrastructureNode "VNET Security Policies" {
                         tags "Microsoft Azure - Network Security Groups" "Policy Object"
                     }
 
-                    devContainerRegistry = infrastructureNode "Dev Container Registry" {
+                    devContainerRegistry = infrastructureNode "Container Registry" {
                         tags "Microsoft Azure - Container Registries" "Registry"
                     }
                     
@@ -217,7 +217,7 @@ workspace {
                         tags "Database" "Microsoft Azure - Azure Database PostgreSQL Server"
                     }
 
-                    privateGatewayInstance = infrastructureNode "Developer Portal"{
+                    devGatewayInstance = infrastructureNode "Developer Portal"{
                         -> devUserMgmtInstance "HTTPS" { 
                             tags "API Path"
                         }
@@ -239,10 +239,10 @@ workspace {
                         tags "Microsoft Azure - API Management Services" "App Interface"
                     }
 
-                    privateGatewayInstance -> devidp "Dev challenge" {
+                    devGatewayInstance -> devidp "Role challenge" {
                         tags "IDP Challenge"
                     }
-                    devidp -> privateGatewayInstance "Dev response" {
+                    devidp -> devGatewayInstance "Role response" {
                         tags "IDP Response"
                     }
                     devfirewall -> devpolicies "Get VNET Security Policies" {
@@ -279,15 +279,301 @@ workspace {
 
             }
 
-            developer -> devfirewall "HTTPS"
+            devrole -> devfirewall "HTTPS"
             devpipeline -> devfirewall "Publishes container image" {
                 tags "Agent Path"
             }
-            devfirewall -> privateGatewayInstance "HTTPS"
+            devfirewall -> devGatewayInstance "HTTPS"
             devfirewall -> devidp "DevOps challenge" {
                 tags "IDP Challenge"
             }
             devidp -> devfirewall "DevOps response" {
+                tags "IDP Response"
+            }
+
+        }
+
+        stagingEnv = deploymentEnvironment "Staging Environment" {
+            
+            deploymentNode "Corporate Network" {
+                stagingrole = infrastructureNode "Quality Engineer" {
+                    tags "Microsoft Azure - Custom Azure AD Roles" "Person"
+                }
+            }
+
+            deploymentNode "Datadog SaaS" {
+                stagingdatadog = infrastructureNode "Datadog APM" {
+                    tags "Datadog APM"
+                }
+                tags "Datadog APM"
+            }
+            
+            deploymentNode "Azure DevOps" {
+                stagingrepo = infrastructureNode "Azure DevOps Repository" {
+                    tags "Azure DevOps Git"
+                }
+                stagingpipeline = infrastructureNode "Azure DevOps Release Agent" {
+                    -> stagingrepo "Pulls source"
+                    -> stagingdatadog "Build/Unit Test analytics"
+                    tags "Azure DevOps Agent"
+                }
+                tags "Microsoft Azure - Azure DevOps"
+            }
+            
+            deploymentNode "Microsoft Azure" {
+                
+                stagingidp = infrastructureNode "Azure Active Directory" {
+                    tags "Microsoft Azure - Azure Active Directory" "Identity Provider"
+                }
+                
+                deploymentNode "Azure VNET" {
+                    
+                    stagingfirewall = infrastructureNode "Network Firewall" {
+                        tags "Microsoft Azure - Firewalls" "Firewall"
+                    }
+                    
+                    stagingpolicies = infrastructureNode "VNET Security Policies" {
+                        tags "Microsoft Azure - Network Security Groups" "Policy Object"
+                    }
+
+                    stagingContainerRegistry = infrastructureNode "Container Registry" {
+                        tags "Microsoft Azure - Container Registries" "Registry"
+                    }
+                    
+                    deploymentNode "Microsoft Azure Container Instances" {
+                        stagingUserMgmtInstance = containerInstance userMgmtapi
+                        stagingProductCatalogInstance = containerInstance productCatalogapi
+                        stagingShoppingCartInstance = containerInstance shoppingCartapi
+                        stagingOrderMgmtInstance = containerInstance orderMgmtapi
+                        stagingPaymentGatewayInstance = containerInstance paymentGatewayapi
+                        stagingAnalyticsInstance = containerInstance analyticsapi
+                        tags "Service API" "Microsoft Azure - Container Instances"
+                    }
+
+                    deploymentNode "Azure Database PostgreSQL Server" {
+                        stagingUserMgmtInstancedb = containerInstance userMgmtdatabase
+                        stagingProductCatalogInstancedb = containerInstance productCatalogdatabase
+                        stagingShoppingCartInstancedb = containerInstance shoppingCartdatabase
+                        stagingOrderMgmtInstancedb = containerInstance orderMgmtdatabase
+                        stagingPaymentGatewayInstancedb = containerInstance paymentGatewaydatabase
+                        stagingAnalyticsInstancedb = containerInstance analyticsdatabase
+                        tags "Database" "Microsoft Azure - Azure Database PostgreSQL Server"
+                    }
+
+                    stagingGatewayInstance = infrastructureNode "Staging Portal"{
+                        -> stagingUserMgmtInstance "HTTPS" { 
+                            tags "API Path"
+                        }
+                        -> stagingProductCatalogInstance "HTTPS" { 
+                            tags "API Path"
+                        }
+                        -> stagingShoppingCartInstance "HTTPS" { 
+                            tags "API Path"
+                        }
+                        -> stagingOrderMgmtInstance "HTTPS" { 
+                            tags "API Path"
+                        }
+                        -> stagingPaymentGatewayInstance "HTTPS" { 
+                            tags "API Path"
+                        }
+                        -> stagingAnalyticsInstance "HTTPS" { 
+                            tags "API Path"
+                        }
+                        tags "Microsoft Azure - API Management Services" "App Interface"
+                    }
+
+                    stagingGatewayInstance -> stagingidp "Role challenge" {
+                        tags "IDP Challenge"
+                    }
+                    stagingidp -> stagingGatewayInstance "Role response" {
+                        tags "IDP Response"
+                    }
+                    stagingfirewall -> stagingpolicies "Get VNET Security Policies" {
+                        tags "API Path"
+                    }
+                    stagingUserMgmtInstance -> stagingContainerRegistry "Pulls Container Image" { 
+                            tags "Registry Pull Path"
+                        }
+                        stagingProductCatalogInstance -> stagingContainerRegistry "Pulls Container Image" { 
+                            tags "Registry Pull Path"
+                        }
+                        stagingShoppingCartInstance -> stagingContainerRegistry "Pulls Container Image" { 
+                            tags "Registry Pull Path"
+                        }
+                        stagingOrderMgmtInstance -> stagingContainerRegistry "Pulls Container Image" { 
+                            tags "Registry Pull Path"
+                        }
+                        stagingPaymentGatewayInstance -> stagingContainerRegistry "Pulls Container Image" { 
+                            tags "Registry Pull Path"
+                        }
+                        stagingAnalyticsInstance -> stagingContainerRegistry "Pulls Container Image" { 
+                            tags "Registry Pull Path"
+                        }
+
+                    stagingfirewall -> stagingContainerRegistry "Publishes container image" {
+                tags "Registry Publish Path"
+            }
+                    
+                    tags "Microsoft Azure - Virtual Networks"
+
+                }
+
+                tags "Microsoft Azure - Resource Groups"
+
+            }
+
+            stagingrole -> stagingfirewall "HTTPS"
+            stagingpipeline -> stagingfirewall "Publishes container image" {
+                tags "Agent Path"
+            }
+            stagingfirewall -> stagingGatewayInstance "HTTPS"
+            stagingfirewall -> stagingidp "DevOps challenge" {
+                tags "IDP Challenge"
+            }
+            stagingidp -> stagingfirewall "DevOps response" {
+                tags "IDP Response"
+            }
+
+        }
+
+        prodEnv = deploymentEnvironment "Production Environment" {
+            
+            deploymentNode "Public Internet" {
+                prodrole = infrastructureNode "Customer" {
+                    tags "Microsoft Azure - Custom Azure AD Roles" "Person"
+                }
+            }
+
+            deploymentNode "Datadog SaaS" {
+                proddatadog = infrastructureNode "Datadog APM" {
+                    tags "Datadog APM"
+                }
+                tags "Datadog APM"
+            }
+            
+            deploymentNode "Azure DevOps" {
+                prodrepo = infrastructureNode "Azure DevOps Repository" {
+                    tags "Azure DevOps Git"
+                }
+                prodpipeline = infrastructureNode "Azure DevOps Release Agent" {
+                    -> prodrepo "Pulls source"
+                    -> proddatadog "Build/Unit Test analytics"
+                    tags "Azure DevOps Agent"
+                }
+                tags "Microsoft Azure - Azure DevOps"
+            }
+            
+            deploymentNode "Microsoft Azure" {
+                
+                prodidp = infrastructureNode "Azure Active Directory" {
+                    tags "Microsoft Azure - Azure Active Directory" "Identity Provider"
+                }
+                
+                deploymentNode "Azure VNET" {
+                    
+                    prodfirewall = infrastructureNode "Network Firewall" {
+                        tags "Microsoft Azure - Firewalls" "Firewall"
+                    }
+                    
+                    prodpolicies = infrastructureNode "VNET Security Policies" {
+                        tags "Microsoft Azure - Network Security Groups" "Policy Object"
+                    }
+
+                    prodContainerRegistry = infrastructureNode "Container Registry" {
+                        tags "Microsoft Azure - Container Registries" "Registry"
+                    }
+                    
+                    deploymentNode "Microsoft Azure Container Instances" {
+                        prodUserMgmtInstance = containerInstance userMgmtapi
+                        prodProductCatalogInstance = containerInstance productCatalogapi
+                        prodShoppingCartInstance = containerInstance shoppingCartapi
+                        prodOrderMgmtInstance = containerInstance orderMgmtapi
+                        prodPaymentGatewayInstance = containerInstance paymentGatewayapi
+                        prodAnalyticsInstance = containerInstance analyticsapi
+                        tags "Service API" "Microsoft Azure - Container Instances"
+                    }
+
+                    deploymentNode "Azure Database PostgreSQL Server" {
+                        prodUserMgmtInstancedb = containerInstance userMgmtdatabase
+                        prodProductCatalogInstancedb = containerInstance productCatalogdatabase
+                        prodShoppingCartInstancedb = containerInstance shoppingCartdatabase
+                        prodOrderMgmtInstancedb = containerInstance orderMgmtdatabase
+                        prodPaymentGatewayInstancedb = containerInstance paymentGatewaydatabase
+                        prodAnalyticsInstancedb = containerInstance analyticsdatabase
+                        tags "Database" "Microsoft Azure - Azure Database PostgreSQL Server"
+                    }
+
+                    prodGatewayInstance = infrastructureNode "Public Portal"{
+                        -> prodUserMgmtInstance "HTTPS" { 
+                            tags "API Path"
+                        }
+                        -> prodProductCatalogInstance "HTTPS" { 
+                            tags "API Path"
+                        }
+                        -> prodShoppingCartInstance "HTTPS" { 
+                            tags "API Path"
+                        }
+                        -> prodOrderMgmtInstance "HTTPS" { 
+                            tags "API Path"
+                        }
+                        -> prodPaymentGatewayInstance "HTTPS" { 
+                            tags "API Path"
+                        }
+                        -> prodAnalyticsInstance "HTTPS" { 
+                            tags "API Path"
+                        }
+                        tags "Microsoft Azure - API Management Services" "App Interface"
+                    }
+
+                    prodGatewayInstance -> prodidp "Role challenge" {
+                        tags "IDP Challenge"
+                    }
+                    prodidp -> prodGatewayInstance "Role response" {
+                        tags "IDP Response"
+                    }
+                    prodfirewall -> prodpolicies "Get VNET Security Policies" {
+                        tags "API Path"
+                    }
+                    prodUserMgmtInstance -> prodContainerRegistry "Pulls Container Image" { 
+                            tags "Registry Pull Path"
+                        }
+                        prodProductCatalogInstance -> prodContainerRegistry "Pulls Container Image" { 
+                            tags "Registry Pull Path"
+                        }
+                        prodShoppingCartInstance -> prodContainerRegistry "Pulls Container Image" { 
+                            tags "Registry Pull Path"
+                        }
+                        prodOrderMgmtInstance -> prodContainerRegistry "Pulls Container Image" { 
+                            tags "Registry Pull Path"
+                        }
+                        prodPaymentGatewayInstance -> prodContainerRegistry "Pulls Container Image" { 
+                            tags "Registry Pull Path"
+                        }
+                        prodAnalyticsInstance -> prodContainerRegistry "Pulls Container Image" { 
+                            tags "Registry Pull Path"
+                        }
+
+                    prodfirewall -> prodContainerRegistry "Publishes container image" {
+                tags "Registry Publish Path"
+            }
+                    
+                    tags "Microsoft Azure - Virtual Networks"
+
+                }
+
+                tags "Microsoft Azure - Resource Groups"
+
+            }
+
+            prodrole -> prodfirewall "HTTPS"
+            prodpipeline -> prodfirewall "Publishes container image" {
+                tags "Agent Path"
+            }
+            prodfirewall -> prodGatewayInstance "HTTPS"
+            prodfirewall -> prodidp "DevOps challenge" {
+                tags "IDP Challenge"
+            }
+            prodidp -> prodfirewall "DevOps response" {
                 tags "IDP Response"
             }
 
@@ -306,6 +592,14 @@ workspace {
         }
 
         deployment * devEnv {
+            include *
+        }
+
+        deployment * stagingEnv {
+            include *
+        }
+
+        deployment * prodEnv {
             include *
         }
 
